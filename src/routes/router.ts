@@ -1,15 +1,58 @@
 import { Router, Request, Response } from 'express';
+import { EncuestaData } from '../classes/encuesta';
+import { GraficaData } from '../classes/grafica';
+import { Marcador } from '../classes/marcador';
 import { Server } from '../classes/server';
-import { usuarioConectados } from '../sockets/sockets';
+import { mapa, usuarioConectados } from '../sockets/sockets';
 
 
 export const router = Router();
 
-router.get('/mensajes', (req: Request, res: Response) => {
+const grafica = new GraficaData();
+const encuesta = new EncuestaData();
+
+router.get('/grafica', (req: Request, res: Response) => {
 
     res.json({
-        ok: true,
-        mensaje: 'Todo esta bien'
+        grafica
+    });
+
+});
+
+router.post('/grafica', (req: Request, res: Response) => {
+
+    const { mes, unidades } = req.body;
+
+    grafica.modificarValor(mes, unidades);
+
+    const server = Server.instance;
+    server.io.emit('post-grafica', grafica);
+
+    res.json({
+        grafica
+    });
+
+});
+
+router.get('/encuesta', (req: Request, res: Response) => {
+
+    res.json({
+        encuesta
+    });
+
+});
+
+router.post('/encuesta', (req: Request, res: Response) => {
+
+    const { pregunta, valor } = req.body;
+
+    encuesta.incrementarValor(Number(pregunta), Number(valor));
+
+    const server = Server.instance;
+    server.io.emit('post-encuesta', encuesta);
+
+    res.json({
+        encuesta
     });
 
 });
@@ -80,5 +123,25 @@ router.get('/usuarios/detalle', (req: Request, res: Response) => {
         ok: true,
         clients: usuarioConectados.lista
     });
+
+});
+
+
+// MODULO DE MAPBOX
+
+router.get('/mapbox', (req: Request, res: Response) => {
+
+    res.json(mapa.getMarcadores());
+
+})
+
+
+router.post('/mapbox', (req: Request, res:Response) => {
+
+    const {id,nombre,lng,lat,color} = req.body;
+    
+    const marcador: Marcador = new Marcador(id,nombre,lng,lat,color);
+
+    res.json({marcador});
 
 });

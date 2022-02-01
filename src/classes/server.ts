@@ -39,7 +39,13 @@ export class Server {
 
             console.log(`Cliente ${cliente.id}: conectado`);
 
-            s.conectarUsuario(cliente, this.io);
+            s.postMarcador(cliente, this.io);
+            
+            s.moveMarcador(cliente, this.io);
+
+            s.removeMarcador(cliente, this.io);
+
+            /* s.conectarUsuario(cliente, this.io);
 
             s.user(cliente, this.io);
 
@@ -47,7 +53,7 @@ export class Server {
 
             s.emitLogout(cliente, this.io);
 
-            s.message(cliente, this.io);
+            s.message(cliente, this.io); */
 
             s.disconnect(cliente, this.io);
 

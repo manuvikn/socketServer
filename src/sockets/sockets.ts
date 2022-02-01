@@ -2,9 +2,12 @@ import { Socket } from 'socket.io';
 import socketIO from 'socket.io';
 import { ListaUsuarios } from '../classes/lista-usuarios';
 import { Usuario } from '../classes/usuario';
+import { Mapa } from '../classes/mapa';
+import { Marcador } from '../classes/marcador';
 
 
 export const usuarioConectados = new ListaUsuarios();
+export const mapa = new Mapa();
 
 export const conectarUsuario = (client: Socket, io:socketIO.Server) => {
 
@@ -69,5 +72,46 @@ export const emitLogout = (client: Socket, io: socketIO.Server) => {
         io.emit('usuarios-activos', usuarioConectados.lista);
 
     })
+
+};
+
+
+// MODULO DE MAPBOX
+
+export const postMarcador = (client: Socket, io: socketIO.Server) => {
+
+    client.on('post-marcador', (payload: Marcador) => {
+
+        mapa.agregarMarcador(payload);
+
+        client.broadcast.emit('update-marcadores', payload);
+
+
+    });
+
+};
+
+
+export const moveMarcador = (client: Socket, io: socketIO.Server) => {
+
+    client.on('move-marcador', (payload: Marcador) => {
+
+        mapa.moverMarcador(payload);
+
+        client.broadcast.emit('server-move-marcador', payload);
+
+    });
+
+};
+
+export const removeMarcador = (client: Socket, io: socketIO.Server) => {
+
+    client.on('remove-marcador', (payload: string) => {
+
+        mapa.borrarMarcador(payload);
+
+        client.broadcast.emit('server-remove-marcador', payload);
+
+    });
 
 };
